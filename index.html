@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Thanshi's cafécafe — Order Online</title>
+  <title>Thanshi’s Café — Order Online</title>
   <meta name="theme-color" content="#006241" />
   <style>
     :root {
@@ -11,17 +11,18 @@
       --light-green: #00754a;
       --cream: #f1f8f4;
       --white: #ffffff;
-      --brown: #382f2d;
       --accent: #cba258;
-      --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      --ink: #1e3932;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(180deg, var(--cream), var(--white));
-      color: var(--brown);
+      color: var(--ink);
     }
 
     header {
@@ -37,7 +38,12 @@
       z-index: 10;
     }
 
-    header h1 { margin: 0; font-size: 1.6rem; letter-spacing: 0.5px; }
+    header h1 { 
+      margin: 0; 
+      font-size: 1.5rem; 
+      letter-spacing: 0.5px;
+    }
+
     header .cart-count {
       background: var(--accent);
       color: #fff;
@@ -45,7 +51,6 @@
       border-radius: 999px;
       font-weight: bold;
       box-shadow: var(--shadow);
-      font-size: 0.95rem;
     }
 
     main {
@@ -62,7 +67,6 @@
       border-radius: 16px;
       box-shadow: var(--shadow);
       padding: 1.5rem;
-      transition: all 0.3s ease;
     }
 
     .menu h2, .cart h2 {
@@ -70,13 +74,13 @@
       border-bottom: 3px solid var(--accent);
       padding-bottom: 0.5rem;
       margin-bottom: 1rem;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .items {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1.2rem;
+      gap: 1rem;
     }
 
     .item {
@@ -85,16 +89,23 @@
       box-shadow: var(--shadow);
       padding: 1rem;
       text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.3s;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
 
-    .item:hover {
+    .item:hover { 
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    .item h3 { margin: 0.5rem 0; color: var(--green); font-weight: 600; }
-    .price { color: var(--accent); font-weight: bold; }
+    .item h3 { 
+      margin: 0.5rem 0; 
+      color: var(--green); 
+    }
+
+    .price { 
+      color: var(--accent); 
+      font-weight: bold; 
+    }
 
     button {
       background: var(--green);
@@ -104,13 +115,12 @@
       border-radius: 8px;
       cursor: pointer;
       margin-top: 0.5rem;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       font-weight: 500;
-      letter-spacing: 0.3px;
     }
 
-    button:hover {
-      background: var(--light-green);
+    button:hover { 
+      background: var(--light-green); 
       transform: scale(1.05);
     }
 
@@ -118,8 +128,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid #eee;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ddd;
     }
 
     .qty-controls {
@@ -132,14 +142,14 @@
       background: var(--accent);
       border: none;
       color: white;
-      padding: 0.25rem 0.6rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 1rem;
+      font-weight: bold;
     }
 
     .remove-btn {
-      background: #c73535;
+      background: #b23b3b;
       border: none;
       color: white;
       padding: 0.3rem 0.6rem;
@@ -152,17 +162,15 @@
       font-weight: bold;
       color: var(--green);
       text-align: right;
-      font-size: 1.1rem;
     }
 
     input, textarea {
       width: 100%;
-      padding: 0.6rem;
+      padding: 0.5rem;
       margin-top: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-family: inherit;
-      font-size: 0.95rem;
     }
 
     input:focus, textarea:focus {
@@ -175,24 +183,20 @@
       background: var(--green);
       color: white;
       font-size: 0.9rem;
-      letter-spacing: 0.3px;
       box-shadow: var(--shadow);
-    }
-
-    @media (max-width: 768px) {
-      main { grid-template-columns: 1fr; }
+      letter-spacing: 0.4px;
     }
   </style>
 </head>
-<body
+<body>
   <header>
-    <h1>☕ Thanshi's café</h1>
+    <h1>☕ Thanshi’s Café</h1>
     <div class="cart-count" id="cartCount">Cart: 0</div>
   </header>
 
   <main>
     <section class="menu">
-      <h2>Our Beverages & Coffees</h2>
+      <h2>Our Coffee & Beverages</h2>
       <div class="items" id="menu"></div>
     </section>
 
@@ -206,12 +210,12 @@
       <label>Table Number:</label>
       <input id="tableNo" type="number" placeholder="Enter table number" required>
       <label>Special Notes:</label>
-      <textarea id="notes" rows="3" placeholder="E.g. Less sugar, extra foam"></textarea>
+      <textarea id="notes" rows="3" placeholder="E.g. Less sugar"></textarea>
       <button id="placeOrder">Place Order</button>
     </section>
   </main>
 
-  <footer>© <span id="year"></span> Thanshi's cafécafe — Brewed with Passion ☕</footer>
+  <footer>© <span id="year"></span> Thanshi’s Café — Brewed with Love ☕</footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
@@ -231,12 +235,11 @@
     const db = getFirestore(app);
 
     const MENU = [
-      { name: 'Caffè Latte', price: 179 },
-      { name: 'Cappuccino', price: 169 },
-      { name: 'Cold Brew', price: 199 },
-      { name: 'Iced Americano', price: 159 },
-      { name: 'Mocha Frappuccino', price: 229 },
-      { name: 'Caramel Macchiato', price: 219 }
+      { name: 'Cappuccino', price: 149 },
+      { name: 'Latte', price: 159 },
+      { name: 'Cold Coffee', price: 139 },
+      { name: 'Tea', price: 79 },
+      { name: 'Frappuccino', price: 189 }
     ];
 
     const menuEl = document.getElementById('menu');
