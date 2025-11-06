@@ -140,34 +140,115 @@
       color: var(--coffee);
       font-size: 0.9rem;
     }
+
+    /* Added simple login box style */
+    #loginBox {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      width: 280px;
+      text-align: center;
+    }
+
+    #loginBox input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #loginBox button {
+      width: 100%;
+      padding: 10px;
+      background: var(--coffee);
+      border-radius: 8px;
+    }
+
+    #loginBox button:hover {
+      background: var(--accent);
+    }
+
+    #errorMsg {
+      color: red;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
-  <header>☕ Thanshi’s Café — Orders Dashboard</header>
-  <main>
-    <h2>🟤 Pending Orders</h2>
-    <div id="pendingOrders"></div>
 
-    <h2>🟢 Accepted Orders</h2>
-    <div id="acceptedOrders"></div>
+  <!-- LOGIN BOX -->
+  <div id="loginBox">
+    <h2>☕ Admin Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p id="errorMsg"></p>
+  </div>
 
-    <h2>🔴 Denied Orders</h2>
-    <div id="deniedOrders"></div>
+  <!-- DASHBOARD CONTENT -->
+  <div id="dashboard" style="display:none;">
+    <header>☕ Thanshi’s Café — Orders Dashboard</header>
+    <main>
+      <h2>🟤 Pending Orders</h2>
+      <div id="pendingOrders"></div>
 
-    <h2>✅ Completed Orders</h2>
-    <div id="completedOrders"></div>
+      <h2>🟢 Accepted Orders</h2>
+      <div id="acceptedOrders"></div>
 
-    <div id="buttons">
-      <button id="enableSoundBtn">🔊 Enable Sound</button>
-      <button id="clearOrdersBtn" style="background:#b23b3b;">🗑️ Clear All Orders</button>
-    </div>
-  </main>
+      <h2>🔴 Denied Orders</h2>
+      <div id="deniedOrders"></div>
 
-  <footer>© 2025 Thanshi’s Café — Brewed with Love ☕</footer>
+      <h2>✅ Completed Orders</h2>
+      <div id="completedOrders"></div>
+
+      <div id="buttons">
+        <button id="enableSoundBtn">🔊 Enable Sound</button>
+        <button id="clearOrdersBtn" style="background:#b23b3b;">🗑️ Clear All Orders</button>
+      </div>
+    </main>
+    <footer>© 2025 Thanshi’s Café — Brewed with Love ☕</footer>
+  </div>
 
   <audio id="newOrderSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9f72b7d056.mp3?filename=notification-3-145251.mp3" preload="auto"></audio>
   <div id="toast">🔔 New Order Received!</div>
 
+  <script type="module">
+    // LOGIN HANDLING
+    const loginBox = document.getElementById('loginBox');
+    const dashboard = document.getElementById('dashboard');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Show login box first
+    loginBox.style.display = 'block';
+
+    // If already logged in
+    if (sessionStorage.getItem("loggedIn") === "true") {
+      loginBox.style.display = "none";
+      dashboard.style.display = "block";
+    }
+
+    loginBtn.addEventListener("click", () => {
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      if (user === "thanshi" && pass === "1234") {
+        sessionStorage.setItem("loggedIn", "true");
+        loginBox.style.display = "none";
+        dashboard.style.display = "block";
+      } else {
+        errorMsg.textContent = "❌ Wrong username or password!";
+      }
+    });
+  </script>
+
+  <!-- ORIGINAL FIREBASE SCRIPT UNCHANGED -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
@@ -255,7 +336,6 @@
         const data = { id: docSnap.id, ...docSnap.data() };
         orders[data.status]?.push(data);
 
-        // New pending order sound
         if (!knownOrderIds.has(docSnap.id) && data.status === "pending") {
           showToast(`New order from Table ${data.table} — ${data.name}`);
           if (soundEnabled) {
