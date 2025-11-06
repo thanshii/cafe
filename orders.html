@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanshi’s Café — Orders Dashboard</title>
+  <style>
+    :root {
+      --coffee: #6f4e37;
+      --cream: #f5efe6;
+      --milk: #fffaf3;
+      --accent: #c2a477;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: var(--cream);
+      color: #3b2f2f;
+    }
+
+    header {
+      background: var(--coffee);
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      color: var(--coffee);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+    }
+
+    .order {
+      background: var(--milk);
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .order h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--coffee);
+    }
+
+    .order p { margin: 0.2rem 0; }
+    .order ul {
+      padding-left: 1.2rem;
+      margin: 0.5rem 0;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 4px;
+    }
+
+    .btn:hover { background: #b48b63; }
+
+    .btn-deny { background: #b23b3b; }
+    .btn-deny:hover { background: #a13030; }
+
+    .btn-accept { background: #4caf50; }
+    .btn-accept:hover { background: #3e8f3e; }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--coffee);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.4s ease;
+      z-index: 9999;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #buttons {
+      text-align: center;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button {
+      background: var(--coffee);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: var(--accent);
+    }
+
+    #enableSoundBtn[disabled] {
+      background: #4caf50;
+      cursor: default;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--coffee);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>☕ Thanshi’s Café — Orders Dashboard</header>
+  <main>
+    <h2>🟤 Pending Orders</h2>
+    <div id="pendingOrders"></div>
+
+    <h2>🟢 Accepted Orders</h2>
+    <div id="acceptedOrders"></div>
+
+    <h2>🔴 Denied Orders</h2>
+    <div id="deniedOrders"></div>
+
+    <h2>✅ Completed Orders</h2>
+    <div id="completedOrders"></div>
+
+    <div id="buttons">
+      <button id="enableSoundBtn">🔊 Enable Sound</button>
+      <button id="clearOrdersBtn" style="background:#b23b3b;">🗑️ Clear All Orders</button>
+    </div>
+  </main>
+
+  <footer>© 2025 Thanshi’s Café — Brewed with Love ☕</footer>
+
+  <audio id="newOrderSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9f72b7d056.mp3?filename=notification-3-145251.mp3" preload="auto"></audio>
+  <div id="toast">🔔 New Order Received!</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyABrFUClu3pxVEaihAjbIRMpbQ8whD94tc",
+      authDomain: "thanshiscafe.firebaseapp.com",
+      projectId: "thanshiscafe",
+      storageBucket: "thanshiscafe.firebasestorage.app",
+      messagingSenderId: "414870680363",
+      appId: "1:414870680363:web:98a03ae5576ff01965cb6e",
+      measurementId: "G-ZG8E6CD0V6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const newOrderSound = document.getElementById('newOrderSound');
+    const enableSoundBtn = document.getElementById('enableSoundBtn');
+    const clearOrdersBtn = document.getElementById('clearOrdersBtn');
+    const toast = document.getElementById('toast');
+
+    const sections = {
+      pending: document.getElementById('pendingOrders'),
+      accepted: document.getElementById('acceptedOrders'),
+      denied: document.getElementById('deniedOrders'),
+      completed: document.getElementById('completedOrders'),
+    };
+
+    let soundEnabled = false;
+    let knownOrderIds = new Set();
+    let alertIntervals = {};
+
+    enableSoundBtn.addEventListener('click', async () => {
+      try {
+        await newOrderSound.play();
+        newOrderSound.pause();
+        newOrderSound.currentTime = 0;
+        soundEnabled = true;
+        enableSoundBtn.textContent = "✅ Sound Enabled";
+        enableSoundBtn.disabled = true;
+      } catch {
+        alert("Please click again to enable sound!");
+      }
+    });
+
+    function showToast(message) {
+      toast.textContent = `🔔 ${message}`;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 4000);
+    }
+
+    function renderOrders(orders, container, actions = []) {
+      container.innerHTML = '';
+      if (orders.length === 0) {
+        container.innerHTML = '<p style="color:gray;">No orders here.</p>';
+        return;
+      }
+
+      orders.forEach(o => {
+        const div = document.createElement('div');
+        div.className = 'order';
+        div.innerHTML = `
+          <h3>Table ${o.table} — ${o.name}</h3>
+          <p><strong>Note:</strong> ${o.note || '—'}</p>
+          <ul>${o.items.map(i => `<li>${i.name} × ${i.qty} — ₹${i.price * i.qty}</li>`).join('')}</ul>
+          <p><strong>Total:</strong> ₹${o.total}</p>
+          <p><small>${new Date(o.time?.toDate ? o.time.toDate() : Date.now()).toLocaleString()}</small></p>
+        `;
+        actions.forEach(a => {
+          const btn = document.createElement('button');
+          btn.className = `btn ${a.class}`;
+          btn.textContent = a.text;
+          btn.onclick = () => a.action(o);
+          div.appendChild(btn);
+        });
+        container.appendChild(div);
+      });
+    }
+
+    onSnapshot(collection(db, "orders"), (snapshot) => {
+      const orders = { pending: [], accepted: [], denied: [], completed: [] };
+
+      snapshot.forEach(docSnap => {
+        const data = { id: docSnap.id, ...docSnap.data() };
+        orders[data.status]?.push(data);
+
+        // New pending order sound
+        if (!knownOrderIds.has(docSnap.id) && data.status === "pending") {
+          showToast(`New order from Table ${data.table} — ${data.name}`);
+          if (soundEnabled) {
+            newOrderSound.play().catch(() => {});
+            alertIntervals[data.id] = setInterval(() => newOrderSound.play().catch(() => {}), 10000);
+          }
+          knownOrderIds.add(docSnap.id);
+        }
+      });
+
+      renderOrders(orders.pending, sections.pending, [
+        { text: '✅ Accept', class: 'btn-accept', action: o => updateDoc(doc(db, "orders", o.id), { status: "accepted" }).then(() => clearInterval(alertIntervals[o.id])) },
+        { text: '❌ Deny', class: 'btn-deny', action: o => updateDoc(doc(db, "orders", o.id), { status: "denied" }).then(() => clearInterval(alertIntervals[o.id])) }
+      ]);
+
+      renderOrders(orders.accepted, sections.accepted, [
+        { text: '✔️ Mark Completed', class: 'btn', action: o => updateDoc(doc(db, "orders", o.id), { status: "completed" }) }
+      ]);
+
+      renderOrders(orders.denied, sections.denied);
+      renderOrders(orders.completed, sections.completed);
+    });
+
+    clearOrdersBtn.addEventListener('click', async () => {
+      if (!confirm("Are you sure you want to delete ALL orders?")) return;
+      const querySnapshot = await getDocs(collection(db, "orders"));
+      querySnapshot.forEach(async d => await deleteDoc(doc(db, "orders", d.id)));
+      Object.values(alertIntervals).forEach(clearInterval);
+      alertIntervals = {};
+      knownOrderIds.clear();
+      showToast("🗑️ All orders cleared!");
+    });
+  </script>
+</body>
+</html>

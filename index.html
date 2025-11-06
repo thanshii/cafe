@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thanshi’s Café — Order Online</title>
+  <meta name="theme-color" content="#6f4e37" />
+  <style>
+    :root {
+      --coffee: #6f4e37;
+      --cream: #f5efe6;
+      --milk: #fffaf3;
+      --accent: #c2a477;
+      --ink: #3b2f2f;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, var(--cream), var(--milk));
+      color: var(--ink);
+    }
+    header {
+      background-color: var(--coffee);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header .cart-count {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-weight: bold;
+      box-shadow: var(--shadow);
+    }
+    main {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .menu, .cart {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .menu h2, .cart h2 {
+      color: var(--coffee);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .item {
+      background: var(--milk);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+    .item:hover { transform: translateY(-5px); }
+    .item h3 { margin: 0.5rem 0; color: var(--coffee); }
+    .price { color: var(--accent); font-weight: bold; }
+    button {
+      background: var(--coffee);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--accent); }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .qty-btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .remove-btn {
+      background: #b23b3b;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .total {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: var(--coffee);
+      text-align: right;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--coffee);
+      color: white;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>☕ Thanshi’s Café</h1>
+    <div class="cart-count" id="cartCount">Cart: 0</div>
+  </header>
+
+  <main>
+    <section class="menu">
+      <h2>Our Coffee & Beverages</h2>
+      <div class="items" id="menu"></div>
+    </section>
+
+    <section class="cart">
+      <h2>Your Order</h2>
+      <div id="cartItems"></div>
+      <div class="total" id="cartTotal">Total: ₹0</div>
+      <hr>
+      <label>Name:</label>
+      <input id="custName" type="text" placeholder="Enter your name" required>
+      <label>Table Number:</label>
+      <input id="tableNo" type="number" placeholder="Enter table number" required>
+      <label>Special Notes:</label>
+      <textarea id="notes" rows="3" placeholder="E.g. Less sugar"></textarea>
+      <button id="placeOrder">Place Order</button>
+    </section>
+  </main>
+
+  <footer>© <span id="year"></span> Thanshi’s Café — Brewed with Love ☕</footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyABrFUClu3pxVEaihAjbIRMpbQ8whD94tc",
+      authDomain: "thanshiscafe.firebaseapp.com",
+      projectId: "thanshiscafe",
+      storageBucket: "thanshiscafe.firebasestorage.app",
+      messagingSenderId: "414870680363",
+      appId: "1:414870680363:web:98a03ae5576ff01965cb6e",
+      measurementId: "G-ZG8E6CD0V6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const MENU = [
+      { name: 'Cappuccino', price: 149 },
+      { name: 'Latte', price: 159 },
+      { name: 'Cold Coffee', price: 139 },
+      { name: 'Tea', price: 79 },
+      { name: 'Frappuccino', price: 189 }
+    ];
+
+    const menuEl = document.getElementById('menu');
+    const cartEl = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    const cartCount = document.getElementById('cartCount');
+    const cart = [];
+
+    function renderMenu() {
+      menuEl.innerHTML = '';
+      MENU.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <h3>${item.name}</h3>
+          <div class="price">₹${item.price}</div>
+          <button onclick="addToCart('${item.name}', ${item.price})">Add to Cart</button>`;
+        menuEl.appendChild(div);
+      });
+    }
+
+    function renderCart() {
+      cartEl.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, i) => {
+        total += item.price * item.qty;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <span>${item.name}</span>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(${i}, -1)">-</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+          </div>
+          <span>₹${item.price * item.qty}</span>
+          <button class="remove-btn" onclick="removeItem(${i})">×</button>`;
+        cartEl.appendChild(div);
+      });
+      totalEl.textContent = `Total: ₹${total}`;
+      cartCount.textContent = `Cart: ${cart.reduce((s, i) => s + i.qty, 0)}`;
+    }
+
+    window.addToCart = (name, price) => {
+      const found = cart.find(i => i.name === name);
+      found ? found.qty++ : cart.push({ name, price, qty: 1 });
+      renderCart();
+    };
+
+    window.changeQty = (i, delta) => {
+      cart[i].qty += delta;
+      if (cart[i].qty <= 0) cart.splice(i, 1);
+      renderCart();
+    };
+
+    window.removeItem = (i) => {
+      cart.splice(i, 1);
+      renderCart();
+    };
+
+    document.getElementById('placeOrder').addEventListener('click', async () => {
+      const name = document.getElementById('custName').value.trim();
+      const table = document.getElementById('tableNo').value.trim();
+      const note = document.getElementById('notes').value.trim();
+      const total = parseInt(totalEl.textContent.replace('Total: ₹', ''));
+
+      if (!name || !table || cart.length === 0) {
+        alert('Please fill in all details and add at least one item.');
+        return;
+      }
+
+      await addDoc(collection(db, 'orders'), {
+        name,
+        table,
+        note,
+        items: cart,
+        total,
+        time: serverTimestamp(),
+        status: 'pending'
+      });
+
+      alert('✅ Order placed successfully!');
+      cart.length = 0;
+      renderCart();
+      document.getElementById('custName').value = '';
+      document.getElementById('tableNo').value = '';
+      document.getElementById('notes').value = '';
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    renderMenu();
+    renderCart();
+  </script>
+</body>
+</html>
