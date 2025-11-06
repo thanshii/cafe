@@ -3,26 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Thanshi’s Café — Order Online</title>
-  <meta name="theme-color" content="#6f4e37" />
+  <title>Thanshi's cafécafe — Order Online</title>
+  <meta name="theme-color" content="#006241" />
   <style>
     :root {
-      --coffee: #6f4e37;
-      --cream: #f5efe6;
-      --milk: #fffaf3;
-      --accent: #c2a477;
-      --ink: #3b2f2f;
-      --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      --green: #006241;
+      --light-green: #00754a;
+      --cream: #f1f8f4;
+      --white: #ffffff;
+      --brown: #382f2d;
+      --accent: #cba258;
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(180deg, var(--cream), var(--milk));
-      color: var(--ink);
+      background: linear-gradient(180deg, var(--cream), var(--white));
+      color: var(--brown);
     }
+
     header {
-      background-color: var(--coffee);
+      background-color: var(--green);
       color: white;
       padding: 1rem 2rem;
       display: flex;
@@ -33,7 +36,8 @@
       top: 0;
       z-index: 10;
     }
-    header h1 { margin: 0; font-size: 1.5rem; }
+
+    header h1 { margin: 0; font-size: 1.6rem; letter-spacing: 0.5px; }
     header .cart-count {
       background: var(--accent);
       color: #fff;
@@ -41,7 +45,9 @@
       border-radius: 999px;
       font-weight: bold;
       box-shadow: var(--shadow);
+      font-size: 0.95rem;
     }
+
     main {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -50,106 +56,143 @@
       max-width: 1200px;
       margin: auto;
     }
+
     .menu, .cart {
-      background: white;
+      background: var(--white);
       border-radius: 16px;
       box-shadow: var(--shadow);
       padding: 1.5rem;
+      transition: all 0.3s ease;
     }
+
     .menu h2, .cart h2 {
-      color: var(--coffee);
-      border-bottom: 2px solid var(--accent);
+      color: var(--green);
+      border-bottom: 3px solid var(--accent);
       padding-bottom: 0.5rem;
       margin-bottom: 1rem;
+      letter-spacing: 0.5px;
     }
+
     .items {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
+      gap: 1.2rem;
     }
+
     .item {
-      background: var(--milk);
+      background: var(--cream);
       border-radius: 12px;
       box-shadow: var(--shadow);
       padding: 1rem;
       text-align: center;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.3s;
     }
-    .item:hover { transform: translateY(-5px); }
-    .item h3 { margin: 0.5rem 0; color: var(--coffee); }
+
+    .item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .item h3 { margin: 0.5rem 0; color: var(--green); font-weight: 600; }
     .price { color: var(--accent); font-weight: bold; }
+
     button {
-      background: var(--coffee);
+      background: var(--green);
       color: white;
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 8px;
       cursor: pointer;
       margin-top: 0.5rem;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      font-weight: 500;
+      letter-spacing: 0.3px;
     }
-    button:hover { background: var(--accent); }
+
+    button:hover {
+      background: var(--light-green);
+      transform: scale(1.05);
+    }
+
     .cart-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #ddd;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #eee;
     }
+
     .qty-controls {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
+
     .qty-btn {
       background: var(--accent);
       border: none;
       color: white;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 1rem;
     }
+
     .remove-btn {
-      background: #b23b3b;
+      background: #c73535;
       border: none;
       color: white;
       padding: 0.3rem 0.6rem;
       border-radius: 6px;
       cursor: pointer;
     }
+
     .total {
       margin-top: 1rem;
       font-weight: bold;
-      color: var(--coffee);
+      color: var(--green);
       text-align: right;
+      font-size: 1.1rem;
     }
+
     input, textarea {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.6rem;
       margin-top: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-family: inherit;
+      font-size: 0.95rem;
     }
+
+    input:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+    }
+
     footer {
       text-align: center;
       padding: 1.5rem;
-      background: var(--coffee);
+      background: var(--green);
       color: white;
       font-size: 0.9rem;
+      letter-spacing: 0.3px;
       box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body>
+<body
   <header>
-    <h1>☕ Thanshi’s Café</h1>
+    <h1>☕ Thanshi's café</h1>
     <div class="cart-count" id="cartCount">Cart: 0</div>
   </header>
 
   <main>
     <section class="menu">
-      <h2>Our Coffee & Beverages</h2>
+      <h2>Our Beverages & Coffees</h2>
       <div class="items" id="menu"></div>
     </section>
 
@@ -163,12 +206,12 @@
       <label>Table Number:</label>
       <input id="tableNo" type="number" placeholder="Enter table number" required>
       <label>Special Notes:</label>
-      <textarea id="notes" rows="3" placeholder="E.g. Less sugar"></textarea>
+      <textarea id="notes" rows="3" placeholder="E.g. Less sugar, extra foam"></textarea>
       <button id="placeOrder">Place Order</button>
     </section>
   </main>
 
-  <footer>© <span id="year"></span> Thanshi’s Café — Brewed with Love ☕</footer>
+  <footer>© <span id="year"></span> Thanshi's cafécafe — Brewed with Passion ☕</footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
@@ -188,11 +231,12 @@
     const db = getFirestore(app);
 
     const MENU = [
-      { name: 'Cappuccino', price: 149 },
-      { name: 'Latte', price: 159 },
-      { name: 'Cold Coffee', price: 139 },
-      { name: 'Tea', price: 79 },
-      { name: 'Frappuccino', price: 189 }
+      { name: 'Caffè Latte', price: 179 },
+      { name: 'Cappuccino', price: 169 },
+      { name: 'Cold Brew', price: 199 },
+      { name: 'Iced Americano', price: 159 },
+      { name: 'Mocha Frappuccino', price: 229 },
+      { name: 'Caramel Macchiato', price: 219 }
     ];
 
     const menuEl = document.getElementById('menu');
